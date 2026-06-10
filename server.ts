@@ -70,7 +70,7 @@ SVG Requirements:
       required: ["title", "type", "svg", "labels", "short_explanation"]
     };
 
-    const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-flash"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-3.5-flash"];
     let responseText = "";
     let lastError: any = null;
 
