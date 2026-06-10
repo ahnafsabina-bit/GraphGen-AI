@@ -64,26 +64,49 @@ SVG Requirements:
 - Ensure the SVG has a viewBox and is responsive.
 - Do not include heavy styling, keep it minimal and educational.`;
 
-    const response = await client.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: [{ parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            title: { type: Type.STRING },
-            type: { type: Type.STRING },
-            svg: { type: Type.STRING },
-            labels: { type: Type.ARRAY, items: { type: Type.STRING } },
-            short_explanation: { type: Type.STRING }
-          },
-          required: ["title", "type", "svg", "labels", "short_explanation"]
-        }
-      }
-    });
+    const responseSchema = {
+       type: Type.OBJECT,
+       properties: {
+         title: { type: Type.STRING },
+         type: { type: Type.STRING },
+         svg: { type: Type.STRING },
+         labels: { type: Type.ARRAY, items: { type: Type.STRING } },
+         short_explanation: { type: Type.STRING }
+       },
+       required: ["title", "type", "svg", "labels", "short_explanation"]
+    };
 
-    const result = JSON.parse(response.text);
+    const modelsToTry = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-flash"];
+    let responseText = "";
+    let lastError: any = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`[Vercel API] Attempting generation with model: ${modelName}`);
+        const response = await client.models.generateContent({
+          model: modelName,
+          contents: [{ parts: [{ text: prompt }] }],
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema
+          }
+        });
+        if (response && response.text) {
+          responseText = response.text;
+          console.log(`[Vercel API] Successfully generated diagram with model: ${modelName}`);
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`[Vercel API] Model ${modelName} failed:`, err.message || err);
+        lastError = err;
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error("All loaded Gemini models failed to generate the diagram due to high load or rate limiting. Please wait a moment and try again.");
+    }
+
+    const result = JSON.parse(responseText);
     res.status(200).json(result);
   } catch (error: any) {
     console.error("Gemini API Error:", error);
