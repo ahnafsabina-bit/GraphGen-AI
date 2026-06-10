@@ -54,7 +54,7 @@ Return ONLY a valid JSON object in the following format:
 SVG Requirements:
 - Use clear lines and shapes.
 - Include labeled parts within the SVG using <text> elements.
-- Use a clean white/purple color scheme.
+- Use realistic, clear, high-contrast scientific colors for clarity and educational value (not constrained to any branding color scheme).
 - Ensure the SVG has a viewBox and is responsive.
 - Do not include heavy styling, keep it minimal and educational.`;
 
