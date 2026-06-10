@@ -42,14 +42,21 @@ export const DiagramGenerator: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate diagram');
+        let errorMessage = 'Failed to generate diagram';
+        try {
+          const errJson = await response.json();
+          if (errJson && errJson.error) {
+            errorMessage = errJson.error;
+          }
+        } catch (_) {}
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       setDiagram(data);
       localStorage.setItem('last_diagram', JSON.stringify(data));
-    } catch (err) {
-      setError("Something went wrong. Please try again later.");
+    } catch (err: any) {
+      setError(err?.message || "Something went wrong. Please try again later.");
       console.error(err);
     } finally {
       setLoading(false);

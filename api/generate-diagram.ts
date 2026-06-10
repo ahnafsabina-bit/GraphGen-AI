@@ -1,14 +1,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let ai: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
+      throw new Error("GEMINI_API_KEY is not configured. Please add GEMINI_API_KEY to your Vercel Environment Variables in your Vercel Project Dashboard under Settings > Environment Variables.");
     }
+    ai = new GoogleGenAI({
+      apiKey: apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return ai;
+}
 
 export default async function handler(req: any, res: any) {
   // Allow CORS
@@ -36,6 +46,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const client = getAI();
     const prompt = `Generate a simple, clean, and professional scientific diagram for the topic: "${topic}" in the category of "${category}".
 Return ONLY a valid JSON object in the following format:
 {
@@ -53,7 +64,7 @@ SVG Requirements:
 - Ensure the SVG has a viewBox and is responsive.
 - Do not include heavy styling, keep it minimal and educational.`;
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: "gemini-3.5-flash",
       contents: [{ parts: [{ text: prompt }] }],
       config: {
@@ -76,6 +87,6 @@ SVG Requirements:
     res.status(200).json(result);
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    res.status(500).json({ error: "Failed to generate diagram. Please try again." });
+    res.status(500).json({ error: error.message || "Failed to generate diagram. Please try again." });
   }
 }

@@ -9,15 +9,25 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let ai: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim() === "") {
+      throw new Error("GEMINI_API_KEY is not configured. Please add GEMINI_API_KEY to your Environment Variables.");
     }
+    ai = new GoogleGenAI({
+      apiKey: apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return ai;
+}
 
 app.use(express.json());
 
@@ -30,6 +40,7 @@ app.post("/api/generate-diagram", async (req, res) => {
   }
 
   try {
+    const client = getAI();
     const prompt = `Generate a simple, clean, and professional scientific diagram for the topic: "${topic}" in the category of "${category}".
 Return ONLY a valid JSON object in the following format:
 {
@@ -47,7 +58,7 @@ SVG Requirements:
 - Ensure the SVG has a viewBox and is responsive.
 - Do not include heavy styling, keep it minimal and educational.`;
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: "gemini-3.5-flash",
       contents: [{ parts: [{ text: prompt }] }],
       config: {
