@@ -10,8 +10,15 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-purple-100 selection:text-purple-900">
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-purple-700 rounded-lg flex items-center justify-center text-white font-black text-xl">G</div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-purple-700 rounded-xl flex items-center justify-center text-white shadow-md shadow-purple-100">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="5" r="2.5" />
+                <circle cx="5" cy="18" r="2.5" />
+                <circle cx="19" cy="18" r="2.5" />
+                <path d="M12 7.5v4.5M12 12L6.5 16M12 12l5.5 4" />
+              </svg>
+            </div>
             <span className="font-bold text-slate-800 tracking-tight">GenGraph AI</span>
           </div>
           <nav className="hidden sm:flex gap-6">
